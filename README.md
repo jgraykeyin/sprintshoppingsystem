@@ -1,2 +1,2 @@
-# sprintshoppingsystem
-Sprint Project 3: Shopping System
+# Sprint Week: Shopping System
+Python project #3 for Sprint Week
