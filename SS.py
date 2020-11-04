@@ -6,6 +6,7 @@ products = []
 current_qty = 0
 current_price = 0
 
+# Read each line of the file and then iterate through the list of lines
 data_contents = data.readlines()
 for line in data_contents:
 
@@ -15,20 +16,31 @@ for line in data_contents:
     # Create a dictionary for the product details to be stored inside a list
     d = {"name":line_contents[0],"price":line_contents[1],"qty":line_contents[2]}
     products.append(d)
-
 data.close()
-#print(products)
 
-# Display the list of products to the user
-for item in products:
-    print("Product: {} // Price: {} // Qty: {}".format(item["name"].capitalize(),item["price"],item["qty"].rstrip("\n")))
+
+def showProducts():
+    '''
+        Description: Display the list of available products 
+        along with price and qty
+    '''
+    for item in products:
+        print("{}:".format(item["name"].capitalize()))
+        print(" Price : ${}".format(item["price"]))
+        print("  Quantity Remaining: {}\n".format(item["qty"].rstrip("\n")))    
+
+# Display the Store's Hello Message
+print("HELLO, WELCOME TO BOBBY’S STORE. THE PRODUCTS WE HAVE ON SALE ARE THE FOLLOWING:")
 
 # Create an empty list to save all the user purchases
 purchases = []
 
-# Start a loop to ask the user for input
+# Start a loop to ask the user for their purchases until they decide to quit
 while True:
 
+    # Show the list of products each time the prompt appears
+    showProducts()
+    
     # Ask the user to input a valid product name that matches a product in our file
     while True:
         user_product = input("Enter a product name from the list above: ")
