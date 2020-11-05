@@ -109,14 +109,9 @@ subtotal = 0
 # TODO: Fix the formatting so it'll look nicer
 print("RECEIPT\n")
 for purchase in purchases:
-<<<<<<< HEAD
 
     price_formatted = formatDollar(purchase["price"])
     print("{:<10} * {:<1} {:>10}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
-=======
-    #print("Product: {} Qty: {} Price: ${:.2f}".format(purchase["name"],purchase["qty"],float(purchase["price"])))
-    print("{:<10} * {:<1} {:>10.2f}".format(purchase["name"].upper(),purchase["qty"],purchase["price"]))
->>>>>>> e16545caf846de5f3525b36f0ef78419531cf47f
     
     subtotal += float(purchase["price"])
     
