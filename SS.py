@@ -7,14 +7,26 @@
 import boto3
 import os
 
+
 # Set file location to current directory
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-# Read the list of products from file and save them into a list
-data = open(os.path.join(__location__,"products.dat"), "r")
+# Setup empty lists to hold our product and purchase data
 products = []
+purchases = []
 current_qty = 0
 current_price = 0
+
+
+# Establish a connection to AWS S3
+s3 = boto3.resource("s3")
+bucket = s3.Bucket("keyinshoppingsystem")
+
+bucket.download_file("products.dat",os.path.join(__location__,"products.dat"))
+
+
+# Read the list of products from file and save them into a list
+data = open(os.path.join(__location__,"products.dat"), "r")
 
 # Read each line of the file and then iterate through the list of lines
 data_contents = data.readlines()
@@ -37,7 +49,7 @@ def showProducts():
     for item in products:
         print("{}:".format(item["name"].capitalize()))
         print(" Price : ${}".format(item["price"]))
-        print("  Quantity Remaining: {}\n".format(item["qty"].rstrip("\n")))
+        print("  Quantity Remaining: {}\n".format(item["qty"]))
 
 
 def formatDollar(dollar_value):
@@ -55,8 +67,6 @@ def formatDollar(dollar_value):
 # Display the Store's Hello Message
 print("HELLO, WELCOME TO BOBBY’S STORE. THE PRODUCTS WE HAVE ON SALE ARE THE FOLLOWING:")
 
-# Create an empty list to save all the user purchases
-purchases = []
 
 # Start a loop to ask the user for their purchases until they decide to quit
 while True:
@@ -103,6 +113,10 @@ while True:
                 purch_d = {"name":user_product,"qty":user_qty,"price":itemprice}
                 purchases.append(purch_d)
                 
+                for p in products:
+                    if p["name"].lower() == purch_d["name"].lower():
+                        p["qty"] = current_qty - user_qty
+
                 break
             else:
                 continue
@@ -128,7 +142,9 @@ for purchase in purchases:
     print("{:<8} * {:<10} {:>7}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
     r.write("{:<8} * {:<10} {:>7}\n".format(purchase["name"].upper(),purchase["qty"],price_formatted))
    
+    # Increment our subtotal by adding the price of each purchase
     subtotal += float(purchase["price"])
+    
     
 # Calculate the HST & Total
 hst = subtotal * 0.15
@@ -148,10 +164,17 @@ r.write("{:<10} {:>18}\n".format("TOTAL:", total_formatted))
 
 r.close()
 
-# Establish a connection to AWS S3
-s3 = boto3.resource("s3")
+# Update the quantities of our products list
+data = open(os.path.join(__location__,"products.dat"), "w")
+for item in products:
+    data.write("{}:{}:{}\n".format(item["name"],item["price"],item["qty"]))
+    #print("{}:{}:{}\n".format(item["name"],item["qty"],item["price"]))
+data.close()
 
-bucket = s3.Bucket("keyinshoppingsystem")
 
-# Upload the receipt to our selected S3 Bucket
+# Upload the receipt and products to our selected S3 Bucket
+bucket.upload_file(os.path.join(__location__,"products.dat"),"products.dat")
 bucket.upload_file(os.path.join(__location__,"receipt.txt"),"receipt.txt")
+
+# Just being polite
+print("\n\nThanks for using our Python Shopping System, have a good day!")
