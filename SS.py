@@ -1,7 +1,17 @@
-# Sprint Week Project #3
+# Python Shopping System by Team 2-9
+# Sprint Week Project #3 November 2020
+# Program that allows users to select items from a list of available products.
+# User can then choose an amount for each product until they're done shopping.
+# Receipt is printed and posted to S3 bucket at the end of program.
+
+import boto3
+import os
+
+# Set file location to current directory
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 # Read the list of products from file and save them into a list
-data = open("products.dat", "r")
+data = open(os.path.join(__location__,"products.dat"), "r")
 products = []
 current_qty = 0
 current_price = 0
@@ -104,7 +114,7 @@ while True:
         break 
 
 # Open a file to save a user receipt 
-r = open("receipt.txt","w")
+r = open(os.path.join(__location__,"receipt.txt"),"w")
 
 subtotal = 0
 
@@ -137,3 +147,11 @@ r.write("{:<10} {:>18}\n".format("HST:",hst_formatted))
 r.write("{:<10} {:>18}\n".format("TOTAL:", total_formatted))
 
 r.close()
+
+# Establish a connection to AWS S3
+s3 = boto3.resource("s3")
+
+bucket = s3.Bucket("keyinshoppingsystem")
+
+# Upload the receipt to our selected S3 Bucket
+bucket.upload_file(os.path.join(__location__,"receipt.txt"),"receipt.txt")
