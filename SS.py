@@ -102,17 +102,22 @@ while True:
 
     if keep_shopping.lower() == "no":
         break 
-        
+
+# Open a file to save a user receipt 
+r = open("receipt.txt","w")
+
 subtotal = 0
 
 # Print all the purchased item info into a receipt
-# TODO: Fix the formatting so it'll look nicer
 print("{:>19}\n".format("RECEIPT"))
+r.write("{:>19}\n\n".format("RECEIPT"))
+
 for purchase in purchases:
 
     price_formatted = formatDollar(purchase["price"])
     print("{:<8} * {:<10} {:>7}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
-    
+    r.write("{:<8} * {:<10} {:>7}\n".format(purchase["name"].upper(),purchase["qty"],price_formatted))
+   
     subtotal += float(purchase["price"])
     
 # Calculate the HST & Total
@@ -127,15 +132,8 @@ print("\n{:<10} {:>18}".format("SUBTOTAL:",subtotal_formatted))
 print("{:<10} {:>18}".format("HST:",hst_formatted))
 print("{:<10} {:>18}".format("TOTAL:", total_formatted))
 
-'''
-Receipt example:
+r.write("\n{:<10} {:>18}\n".format("SUBTOTAL:",subtotal_formatted))
+r.write("{:<10} {:>18}\n".format("HST:",hst_formatted))
+r.write("{:<10} {:>18}\n".format("TOTAL:", total_formatted))
 
-        RECEIPT
-        
-FROZEN PIZZA * 3    $88.99
-FROZEN PIZZA * 2    $33.33
-
-SUBTOTAL:           $223.22
-TAX:                $10.99
-TOTAL:              $222.22
-'''
+r.close()
