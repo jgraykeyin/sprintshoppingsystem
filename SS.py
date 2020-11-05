@@ -1,7 +1,7 @@
 # Sprint Week Project #3
 
 # Read the list of products from file and save them into a list
-data = open("/home/ec2-user/environment/Shopping System Problem/products.dat", "r")
+data = open("products.dat", "r")
 products = []
 current_qty = 0
 current_price = 0
@@ -107,11 +107,11 @@ subtotal = 0
 
 # Print all the purchased item info into a receipt
 # TODO: Fix the formatting so it'll look nicer
-print("RECEIPT\n")
+print("{:>19}\n".format("RECEIPT"))
 for purchase in purchases:
 
     price_formatted = formatDollar(purchase["price"])
-    print("{:<10} * {:<1} {:>10}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
+    print("{:<8} * {:<10} {:>7}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
     
     subtotal += float(purchase["price"])
     
@@ -123,9 +123,9 @@ subtotal_formatted = formatDollar(subtotal)
 hst_formatted = formatDollar(hst)
 total_formatted = formatDollar(total)
 
-print("\n{:<10} {:>10}".format("SUBTOTAL:",subtotal_formatted))
-print("{:<10} {:>10}".format("HST:",hst_formatted))
-print("{:<10} {:>10}".format("TOTAL:", total_formatted))
+print("\n{:<10} {:>18}".format("SUBTOTAL:",subtotal_formatted))
+print("{:<10} {:>18}".format("HST:",hst_formatted))
+print("{:<10} {:>18}".format("TOTAL:", total_formatted))
 
 '''
 Receipt example:
