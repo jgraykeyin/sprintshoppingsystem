@@ -36,7 +36,7 @@ def formatDollar(dollar_value):
         includes the $ character so it can be aligned properly in a receipt
         Returns a string ie (125.50 [int] -> $125.50 [string])
     '''
-    '{:.2f}'.format(round(2606.89579999999, 2))
+    '{:.2f}'.format(round(dollar_value, 2))
     value_formatted = "{:.2f}".format(round(dollar_value,2))
     value_formatted = "$" + str(value_formatted)
     return value_formatted
