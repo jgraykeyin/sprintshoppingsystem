@@ -1,7 +1,7 @@
 # Sprint Week Project #3
 
 # Read the list of products from file and save them into a list
-data = open("products.dat", "r")
+data = open("/home/ec2-user/environment/Shopping System Problem/products.dat", "r")
 products = []
 current_qty = 0
 current_price = 0
@@ -27,7 +27,20 @@ def showProducts():
     for item in products:
         print("{}:".format(item["name"].capitalize()))
         print(" Price : ${}".format(item["price"]))
-        print("  Quantity Remaining: {}\n".format(item["qty"].rstrip("\n")))    
+        print("  Quantity Remaining: {}\n".format(item["qty"].rstrip("\n")))
+
+
+def formatDollar(dollar_value):
+    '''
+        Description: Format a float value to a string which
+        includes the $ character so it can be aligned properly in a receipt
+        Returns a string ie (125.50 [int] -> $125.50 [string])
+    '''
+    '{:.2f}'.format(round(2606.89579999999, 2))
+    value_formatted = "{:.2f}".format(round(dollar_value,2))
+    value_formatted = "$" + str(value_formatted)
+    return value_formatted
+    
 
 # Display the Store's Hello Message
 print("HELLO, WELCOME TO BOBBY’S STORE. THE PRODUCTS WE HAVE ON SALE ARE THE FOLLOWING:")
@@ -96,8 +109,9 @@ subtotal = 0
 # TODO: Fix the formatting so it'll look nicer
 print("RECEIPT\n")
 for purchase in purchases:
-    #print("Product: {} Qty: {} Price: ${:.2f}".format(purchase["name"],purchase["qty"],float(purchase["price"])))
-    print("{:<10} * {:<5} {:>10}".format(purchase["name"].upper(),purchase["qty"],purchase["price"]))
+
+    price_formatted = formatDollar(purchase["price"])
+    print("{:<10} * {:<1} {:>10}".format(purchase["name"].upper(),purchase["qty"],price_formatted))
     
     subtotal += float(purchase["price"])
     
@@ -105,9 +119,13 @@ for purchase in purchases:
 hst = subtotal * 0.15
 total = subtotal + hst
 
-print("\n{:<10}: {:>10.2f}".format("SUBTOTAL",subtotal))
-print("{:<10}: {:>10.2f}".format("HST",hst))
-print("{:<10}: {:>10.2f}".format("TOTAL", total))
+subtotal_formatted = formatDollar(subtotal)
+hst_formatted = formatDollar(hst)
+total_formatted = formatDollar(total)
+
+print("\n{:<10} {:>10}".format("SUBTOTAL:",subtotal_formatted))
+print("{:<10} {:>10}".format("HST:",hst_formatted))
+print("{:<10} {:>10}".format("TOTAL:", total_formatted))
 
 '''
 Receipt example:
