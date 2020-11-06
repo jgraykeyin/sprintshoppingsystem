@@ -4,15 +4,12 @@
 # User can then choose an amount for each product until they're done shopping.
 # Receipt is printed and posted to S3 bucket at the end of program.
 
-# TODO: Download defaults.cfg from bucket that includes GST and Discount rates
-# TODO: Apply discount from defaults.cfg
-# TODO: Create unique receipt names so they will all be saved in S3
 # TODO: Calculate totals from all receipts on a given date (new program to do this)
 # TODO: Graph totals from each day (probably another program for this)
 
 import boto3
 import os
-
+import uuid
 
 # Set file location to current directory
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -28,7 +25,17 @@ current_price = 0
 s3 = boto3.resource("s3")
 bucket = s3.Bucket("keyinshoppingsystem")
 
+
+# Download the products file and the defaults file from our S3 bucket
 bucket.download_file("products.dat",os.path.join(__location__,"products.dat"))
+bucket.download_file("defaults.cfg",os.path.join(__location__,"defaults.cfg"))
+
+
+# Read the contents of the defaults.cfg file and assign the values to variables
+dfile = open(os.path.join(__location__,"defaults.cfg"), "r")
+hst_rate = float(dfile.readline())
+discount_rate = float(dfile.readline())
+dfile.close()
 
 
 # Read the list of products from file and save them into a list
@@ -40,6 +47,10 @@ for line in data_contents:
 
     # Split the string into pieces and store into line_contents list
     line_contents = line.split(":")
+    
+    # Check for any newline strings
+    if "\n" in line_contents[2]:
+        line_contents[2] = line_contents[2].strip("\n")
     
     # Create a dictionary for the product details to be stored inside a list
     d = {"name":line_contents[0],"price":line_contents[1],"qty":line_contents[2]}
@@ -153,19 +164,40 @@ for purchase in purchases:
     
     
 # Calculate the HST & Total
-hst = subtotal * 0.15
-total = subtotal + hst
+hst = subtotal * hst_rate
+discount = 0
+
+if subtotal > 100:
+    discount = subtotal * discount_rate
+    subtotal_discounted = subtotal - discount
+    total = subtotal_discounted + hst
+else:
+    total = subtotal + hst
 
 subtotal_formatted = formatDollar(subtotal)
 hst_formatted = formatDollar(hst)
 total_formatted = formatDollar(total)
 
+if subtotal > 100:
+    print("\nYou're eligible for a {}% discount \ndue to an order order $100.00".format(discount_rate*100))
+    r.write("\nYou're eligible for a {}% discount \ndue to an order order $100.00\n".format(discount_rate*100))
+    discount_formatted = formatDollar(discount)
+    subtotal_discounted_formatted = formatDollar(subtotal_discounted)
+
 print("\n{:<10} {:>18}".format("SUBTOTAL:",subtotal_formatted))
-print("{:<10} {:>18}".format("HST:",hst_formatted))
-print("{:<10} {:>18}".format("TOTAL:", total_formatted))
+print("{:<10} {:>18}".format("TAX:",hst_formatted))
 
 r.write("\n{:<10} {:>18}\n".format("SUBTOTAL:",subtotal_formatted))
-r.write("{:<10} {:>18}\n".format("HST:",hst_formatted))
+r.write("{:<10} {:>18}\n".format("TAX:",hst_formatted))
+
+if subtotal > 100:
+    print("{:<10} {:>18}".format("DISCOUNT:", discount_formatted))
+    print("hello")
+    print("{:<10} {:>14}".format("DISC SUBTOTAL:", subtotal_discounted_formatted))
+    r.write("{:<10} {:>18}\n".format("DISCOUNT:", discount_formatted))
+    r.write("{:<10} {:>14}\n".format("DISC SUBTOTAL:", subtotal_discounted_formatted))
+    
+print("{:<10} {:>18}".format("TOTAL:", total_formatted))
 r.write("{:<10} {:>18}\n".format("TOTAL:", total_formatted))
 
 r.close()
@@ -177,10 +209,12 @@ for item in products:
     #print("{}:{}:{}\n".format(item["name"],item["qty"],item["price"]))
 data.close()
 
+uuid_string = str(uuid.uuid4().hex)
+receipt_filename = "receipt_"+uuid_string+".txt"
 
 # Upload the receipt and products to our selected S3 Bucket
 bucket.upload_file(os.path.join(__location__,"products.dat"),"products.dat")
-bucket.upload_file(os.path.join(__location__,"receipt.txt"),"receipt.txt")
+bucket.upload_file(os.path.join(__location__,"receipt.txt"),receipt_filename)
 
 # Just being polite
 print("\n\nThanks for using our Python Shopping System, have a good day!")
