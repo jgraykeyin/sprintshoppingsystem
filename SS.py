@@ -4,6 +4,12 @@
 # User can then choose an amount for each product until they're done shopping.
 # Receipt is printed and posted to S3 bucket at the end of program.
 
+# TODO: Download defaults.cfg from bucket that includes GST and Discount rates
+# TODO: Apply discount from defaults.cfg
+# TODO: Create unique receipt names so they will all be saved in S3
+# TODO: Calculate totals from all receipts on a given date (new program to do this)
+# TODO: Graph totals from each day (probably another program for this)
+
 import boto3
 import os
 
