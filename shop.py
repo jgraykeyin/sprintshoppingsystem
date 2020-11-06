@@ -10,6 +10,7 @@
 import boto3
 import os
 import uuid
+from datetime import datetime
 
 # Set file location to current directory
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -40,6 +41,7 @@ dfile.close()
 
 # Read the list of products from file and save them into a list
 data = open(os.path.join(__location__,"products.dat"), "r")
+
 
 # Read each line of the file and then iterate through the list of lines
 data_contents = data.readlines()
@@ -82,7 +84,7 @@ def formatDollar(dollar_value):
     
 
 # Display the Store's Hello Message
-print("HELLO, WELCOME TO BOBBY’S STORE. THE PRODUCTS WE HAVE ON SALE ARE THE FOLLOWING:")
+print("HELLO, WELCOME TO THE TEAM 2-9 STORE. THE PRODUCTS WE HAVE ON SALE ARE THE FOLLOWING:")
 
 
 # Start a loop to ask the user for their purchases until they decide to quit
@@ -167,6 +169,8 @@ for purchase in purchases:
 hst = subtotal * hst_rate
 discount = 0
 
+
+# Calculate the discount if the subtotal is over $100
 if subtotal > 100:
     discount = subtotal * discount_rate
     subtotal_discounted = subtotal - discount
@@ -185,6 +189,7 @@ if subtotal > 100:
     subtotal_discounted_formatted = formatDollar(subtotal_discounted)
 
 print("\n{:<10} {:>18}".format("SUBTOTAL:",subtotal_formatted))
+print("hello?")
 print("{:<10} {:>18}".format("TAX:",hst_formatted))
 
 r.write("\n{:<10} {:>18}\n".format("SUBTOTAL:",subtotal_formatted))
@@ -199,8 +204,8 @@ if subtotal > 100:
     
 print("{:<10} {:>18}".format("TOTAL:", total_formatted))
 r.write("{:<10} {:>18}\n".format("TOTAL:", total_formatted))
-
 r.close()
+
 
 # Update the quantities of our products list
 data = open(os.path.join(__location__,"products.dat"), "w")
@@ -209,12 +214,18 @@ for item in products:
     #print("{}:{}:{}\n".format(item["name"],item["qty"],item["price"]))
 data.close()
 
+
+# Create a unique filename for the receipt so it won't overwrite the previous
 uuid_string = str(uuid.uuid4().hex)
 receipt_filename = "receipt_"+uuid_string+".txt"
 
+date_today = datetime.today().strftime('%Y-%m-%d')
+
+receipt_path = str(date_today) + "/" + receipt_filename
+
 # Upload the receipt and products to our selected S3 Bucket
 bucket.upload_file(os.path.join(__location__,"products.dat"),"products.dat")
-bucket.upload_file(os.path.join(__location__,"receipt.txt"),receipt_filename)
+bucket.upload_file(os.path.join(__location__,"receipt.txt"),receipt_path)
 
 # Just being polite
 print("\n\nThanks for using our Python Shopping System, have a good day!")
