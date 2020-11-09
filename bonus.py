@@ -21,3 +21,16 @@ sales = downloadDirectoryFroms3("keyinshoppingsystem",user_date)
 
 print("Downloaded receipts for {}".format(sales))
 
+receipt_path = os.path.join(__location__,sales)
+print(receipt_path)
+
+total = 0
+for filename in os.listdir(receipt_path):
+   with open(os.path.join(receipt_path, filename), 'r') as f:
+       file_lines = f.readlines()
+       last_line = file_lines[-1]
+       items = last_line.split("$")
+       r_total = float(items[-1].strip("\n"))
+       total += r_total
+       
+print("Total sales for {}: ${:.2f}".format(sales,total))
