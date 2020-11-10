@@ -4,7 +4,6 @@
 # User can then choose an amount for each product until they're done shopping.
 # Receipt is printed and posted to S3 bucket at the end of program.
 
-# TODO: Calculate totals from all receipts on a given date (new program to do this)
 # TODO: Graph totals from each day (probably another program for this)
 
 import boto3
@@ -33,6 +32,8 @@ bucket.download_file("defaults.cfg",os.path.join(__location__,"defaults.cfg"))
 
 
 # Read the contents of the defaults.cfg file and assign the values to variables
+#dfile = open("defaults.cfg","r")
+
 dfile = open(os.path.join(__location__,"defaults.cfg"), "r")
 hst_rate = float(dfile.readline())
 discount_rate = float(dfile.readline())
@@ -60,11 +61,14 @@ for line in data_contents:
 data.close()
 
 
+
 def showProducts():
     '''
-        Description: Display the list of available products 
-        along with price and qty
+    Description: Shows a list of products from our products.dat file.
+    Parameters: None
+    Returns: Nothing
     '''
+    
     for item in products:
         print("{}:".format(item["name"].capitalize()))
         print(" Price : ${}".format(item["price"]))
@@ -73,13 +77,17 @@ def showProducts():
 
 def formatDollar(dollar_value):
     '''
-        Description: Format a float value to a string which
-        includes the $ character so it can be aligned properly in a receipt
-        Returns a string ie (125.50 [int] -> $125.50 [string])
+    Description: Converts a float into a string and adds a dollar sign into it for easier text alignment.
+    Parameters:
+        dollar_value - The dollar value as a float
+    Returns:
+        The string value with an added $ character
     '''
+    
     '{:.2f}'.format(round(dollar_value, 2))
     value_formatted = "{:.2f}".format(round(dollar_value,2))
     value_formatted = "$" + str(value_formatted)
+
     return value_formatted
     
 
@@ -132,6 +140,7 @@ while True:
                 purch_d = {"name":user_product,"qty":user_qty,"price":itemprice}
                 purchases.append(purch_d)
                 
+                # Decrease the qty of item being purchased so we can update the products.dat file
                 for p in products:
                     if p["name"].lower() == purch_d["name"].lower():
                         p["qty"] = current_qty - user_qty
@@ -169,7 +178,6 @@ for purchase in purchases:
 hst = subtotal * hst_rate
 discount = 0
 
-
 # Calculate the discount if the subtotal is over $100
 if subtotal > 100:
     discount = subtotal * discount_rate
@@ -182,6 +190,7 @@ subtotal_formatted = formatDollar(subtotal)
 hst_formatted = formatDollar(hst)
 total_formatted = formatDollar(total)
 
+# Display all the financial info, also write it to file for a receipt
 if subtotal > 100:
     print("\nYou're eligible for a {}% discount \ndue to an order order $100.00".format(discount_rate*100))
     r.write("\nYou're eligible for a {}% discount \ndue to an order order $100.00\n".format(discount_rate*100))
@@ -211,7 +220,6 @@ r.close()
 data = open(os.path.join(__location__,"products.dat"), "w")
 for item in products:
     data.write("{}:{}:{}\n".format(item["name"],item["price"],item["qty"]))
-    #print("{}:{}:{}\n".format(item["name"],item["qty"],item["price"]))
 data.close()
 
 
@@ -219,9 +227,14 @@ data.close()
 uuid_string = str(uuid.uuid4().hex)
 receipt_filename = "receipt_"+uuid_string+".txt"
 
-date_today = datetime.today().strftime('%Y-%m-%d')
 
+# Getting the current date and turning that into a folder name for the receipt to be stored in.
+# example: '2020-11-05/receipt_filename.txt'
+# This will keep the receipts organized by the day they were created.
+date_today = datetime.today().strftime('%Y-%m-%d')
 receipt_path = str(date_today) + "/" + receipt_filename
+
+
 
 # Upload the receipt and products to our selected S3 Bucket
 bucket.upload_file(os.path.join(__location__,"products.dat"),"products.dat")
@@ -229,3 +242,4 @@ bucket.upload_file(os.path.join(__location__,"receipt.txt"),receipt_path)
 
 # Just being polite
 print("\n\nThanks for using our Python Shopping System, have a good day!")
+
