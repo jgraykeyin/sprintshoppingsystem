@@ -6,32 +6,46 @@
 import boto3
 import os
 import matplotlib.pyplot as plt
-import numpy
 
 
 # Setting the path for the current direction
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 def downloadAllDirectoriesFroms3(bucketName):
+    '''
+    Description: Downloads all directories from an S3 bucket and creates a bar
+    graph with the sales data of all receipts contained in the directories.
+    Parameters:
+        bucketName - Name of the S3 bucket
+    Returns: 
+        Path of the generated daily-sales bar graph
+    '''    
     dir_list = []
 
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(bucketName)
+    
+    # Create a local directory for each directory that exists in the S3 bucket, 
+    # then download the contens of directory.
     for obj in bucket.objects.all():
         if not os.path.exists(os.path.dirname(os.path.join(__location__,obj.key))):
             os.makedirs(os.path.dirname(os.path.join(__location__,obj.key)))
         bucket.download_file(obj.key, os.path.join(__location__,obj.key))
         
+        # Make sure the directory is a daily receipts folder by matching the '20' from 2020-11-09/ for example.
+        # Keep a list of directory names so we can graph them as the days
         dirname = os.path.dirname(obj.key)
         if "20" in dirname:
             dir_list.append(dirname)
-            
+    
+    # Get the daily sales from each day and save them into a list, so we can graph them!        
     sales=[]
     for d in dir_list:
         daily_sales = get_sales_for_day(d)
         sales.append(daily_sales[1])
     
     
+    # Graph those daily sales mixed with the date strings, it's going to look so pretty!
     plt.bar(dir_list,sales, label="Sales in CAD")
     plt.legend()
     plt.xlabel('Days')
