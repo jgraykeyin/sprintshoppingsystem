@@ -30,11 +30,18 @@ def downloadAllDirectoriesFroms3(bucketName):
     for d in dir_list:
         daily_sales = get_sales_for_day(d)
         sales.append(daily_sales[1])
-        
-    plt.plot(sales)
-    plt.xlabel('Sales')
-    plt.savefig('dailysales.png')
+    
+    
+    plt.bar(dir_list,sales, label="Sales in CAD")
+    plt.legend()
+    plt.xlabel('Days')
+    plt.ylabel('Dollars')
+    plt.savefig(os.path.join(__location__,'dailysales.png'))
     plt.show()
+    
+    graph_path = os.path.join(__location__,'dailysales.png')
+    return graph_path
+
     
 
 def downloadDirectoryFroms3(bucketName, remoteDirectoryName):
@@ -104,5 +111,6 @@ while True:
         
     elif user_select == 2:
         
-        downloadAllDirectoriesFroms3("keyinshoppingsystem")
+        sales_graph = downloadAllDirectoriesFroms3("keyinshoppingsystem")
+        print("\nYou can find the sales graph in the folder:\n{}\n".format(sales_graph))
 
