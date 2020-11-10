@@ -5,9 +5,37 @@
 
 import boto3
 import os
+import matplotlib.pyplot as plt
+import numpy
+
 
 # Setting the path for the current direction
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+def downloadAllDirectoriesFroms3(bucketName):
+    dir_list = []
+
+    s3_resource = boto3.resource('s3')
+    bucket = s3_resource.Bucket(bucketName)
+    for obj in bucket.objects.all():
+        if not os.path.exists(os.path.dirname(os.path.join(__location__,obj.key))):
+            os.makedirs(os.path.dirname(os.path.join(__location__,obj.key)))
+        bucket.download_file(obj.key, os.path.join(__location__,obj.key))
+        
+        dirname = os.path.dirname(obj.key)
+        if "20" in dirname:
+            dir_list.append(dirname)
+            
+    sales=[]
+    for d in dir_list:
+        daily_sales = get_sales_for_day(d)
+        sales.append(daily_sales[1])
+        
+    plt.plot(sales)
+    plt.xlabel('Sales')
+    plt.savefig('dailysales.png')
+    plt.show()
+    
 
 def downloadDirectoryFroms3(bucketName, remoteDirectoryName):
     '''
@@ -19,26 +47,23 @@ def downloadDirectoryFroms3(bucketName, remoteDirectoryName):
         Name of the directory downloaded
     '''
     s3_resource = boto3.resource('s3')
-    bucket = s3_resource.Bucket(bucketName) 
+    bucket = s3_resource.Bucket(bucketName)
     for obj in bucket.objects.filter(Prefix = remoteDirectoryName):
         if not os.path.exists(os.path.dirname(os.path.join(__location__,obj.key))):
             os.makedirs(os.path.dirname(os.path.join(__location__,obj.key)))
-        bucket.download_file(obj.key, os.path.join(__location__,obj.key)) # save to same path
+        bucket.download_file(obj.key, os.path.join(__location__,obj.key))
         
     return os.path.dirname(obj.key)
     
-def get_sales_for_day():
+def get_sales_for_day(user_date):
     '''
     Description: Calculate the total daily sales of a chosen date by reading 
     each receipt in a directory matching the date.
     Parameters:
-       None
+       user_date - Directory name containing receipts thats named after the date
     Returns: 
         List containing date and total sale value
     '''    
-    
-    # TODO: Validate input
-    user_date = input("Please enter requested date (YYYY-MM-DD): ")
 
     # Download a directory and all it's receipts
     sales = downloadDirectoryFroms3("keyinshoppingsystem",user_date)
@@ -51,6 +76,7 @@ def get_sales_for_day():
     total = 0
     for filename in os.listdir(receipt_path):
         with open(os.path.join(receipt_path, filename), 'r') as f:
+            
             file_lines = f.readlines()
             last_line = file_lines[-1]
             items = last_line.split("$")
@@ -69,6 +95,14 @@ while True:
     user_select = int(input("Please select an option #: "))
     
     if user_select == 1:
-        sales = get_sales_for_day()
+        # TODO: Validate input
+        user_date = input("Please enter requested date (YYYY-MM-DD): ")
+        
+        sales = get_sales_for_day(user_date)
+        
         print("\nTotal sales for {}: ${}\n".format(sales[0],sales[1]))
+        
+    elif user_select == 2:
+        
+        downloadAllDirectoriesFroms3("keyinshoppingsystem")
 
