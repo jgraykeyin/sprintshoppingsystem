@@ -5,7 +5,12 @@ and allows the user to select items they would like to purchase, along with the
 quantity of each item. Once the user has finished their shopping, the program
 will print & save a receipt for their transaction.
 
-To run this program in your terminal, from the program current's directory run this command:
+Running the program:
+
+First you'll need to install the boto3 module using pip:
+python3 -m pip install boto3
+
+Then you can run the shopping system with:
 python3 shop.py
 
 There will be text prompts that appear immediately after the store's inventory
@@ -31,3 +36,10 @@ also uploads this receipt to the day's collection of receipts.
 
 As a back-end extention, an admin program is contained inside bonus.py which allows store managers
 to download all receipts and view daily sale graphs.
+Running the bonus.py admin program:
+
+First install the matplotlib module:
+python3 -m pip install matplotlib
+
+Then run the bonus program:
+python3 bonus.py
