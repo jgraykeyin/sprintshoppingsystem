@@ -1,2 +1,46 @@
 # Sprint Week: Shopping System
 Python project #3 for Sprint Week
+
+This program displays a list of available products from a store's inventory
+and allows the user to select items they would like to purchase, along with the
+quantity of each item. Once the user has finished their shopping, the program
+will print & save a receipt for their transaction.
+
+Running the program:
+
+First you'll need to install the boto3 module using pip:
+python3 -m pip install boto3
+
+Then you can run the shopping system with:
+python3 shop.py
+
+There will be text prompts that appear immediately after the store's inventory
+is displayed, asking you to choose a matching product and a quantity.
+
+showProducts():
+- Description: Shows a list of products from our products.dat file.
+- Parameters: None
+- Returns: Nothing
+
+formatDollar(dollar_value):
+- Description: Converts a float into a string and adds a dollar sign into it for easier text alignment.
+- Parameters:
+    dollar_value - The dollar value as a float
+- Returns:
+    The string value with an added $ character
+    
+The initial part of the program connects to an S3 bucket to download the product inventory and 
+the program's default settings (HST and discount rates). The main program loop continually
+prompts the user to choose a product, and then choose a quantity. Once the user is done, they
+can quit the loop and will receive a receipt printed onto their screen. The program
+also uploads this receipt to the day's collection of receipts.
+
+As a back-end extention, an admin program is contained inside bonus.py which allows store managers
+to download all receipts and view daily sale graphs.
+Running the bonus.py admin program:
+
+First install the matplotlib module:
+python3 -m pip install matplotlib
+
+Then run the bonus program:
+python3 bonus.py
