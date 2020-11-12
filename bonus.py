@@ -112,7 +112,8 @@ print("Shopping System Admin Panel\n")
 while True:
     
     print("[1] - View total sales for a specific date")
-    print("[2] - View a graph of the daily sales\n")
+    print("[2] - View a graph of the daily sales")
+    print("[0] - Quit\n")
     user_select = int(input("Please select an option #: "))
     
     if user_select == 1:
@@ -127,4 +128,8 @@ while True:
         
         sales_graph = downloadAllDirectoriesFroms3("keyinshoppingsystem")
         print("\nYou can find the sales graph in the folder:\n{}\n".format(sales_graph))
+        
+    elif user_select == 0:
+        print("Thank you for using the Shopping System Admin program!")
+        break
 
