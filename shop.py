@@ -4,8 +4,6 @@
 # User can then choose an amount for each product until they're done shopping.
 # Receipt is printed and posted to S3 bucket at the end of program.
 
-# TODO: Graph totals from each day (probably another program for this)
-
 import boto3
 import os
 import uuid
@@ -29,7 +27,7 @@ bucket = s3.Bucket("keyinshoppingsystem")
 # Download the products file and the defaults file from our S3 bucket
 bucket.download_file("products.dat",os.path.join(__location__,"products.dat"))
 bucket.download_file("defaults.cfg",os.path.join(__location__,"defaults.cfg"))
-
+    
 
 # Read the contents of the defaults.cfg file and assign the values to variables
 #dfile = open("defaults.cfg","r")
@@ -198,15 +196,16 @@ if subtotal > 100:
     subtotal_discounted_formatted = formatDollar(subtotal_discounted)
 
 print("\n{:<10} {:>18}".format("SUBTOTAL:",subtotal_formatted))
-print("hello?")
+#print("hello?")
 print("{:<10} {:>18}".format("TAX:",hst_formatted))
 
 r.write("\n{:<10} {:>18}\n".format("SUBTOTAL:",subtotal_formatted))
 r.write("{:<10} {:>18}\n".format("TAX:",hst_formatted))
 
+# Checking to see if the subtotal is above $100, we'll apply a discount if true
 if subtotal > 100:
     print("{:<10} {:>18}".format("DISCOUNT:", discount_formatted))
-    print("hello")
+    #print("hello")
     print("{:<10} {:>14}".format("DISC SUBTOTAL:", subtotal_discounted_formatted))
     r.write("{:<10} {:>18}\n".format("DISCOUNT:", discount_formatted))
     r.write("{:<10} {:>14}\n".format("DISC SUBTOTAL:", subtotal_discounted_formatted))
